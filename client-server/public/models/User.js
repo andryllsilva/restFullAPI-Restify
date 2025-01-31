@@ -23,6 +23,10 @@ class User {
         return this._name;
     }
 
+    set name(name) {
+        this._name = name
+    }
+
     get gender() {
         return this._gerder;
     }
@@ -39,8 +43,17 @@ class User {
         return this._email;
     }
 
+    set email(email) {
+        this._email = email
+    }
+
     get password() {
         return this._password
+    }
+
+    set password(password){
+        this._password = password
+
     }
 
     get photo() {
@@ -85,31 +98,39 @@ class User {
 
     }
 
+    toJSON() {
+
+        let json = {}
+
+        Object.keys(this).forEach(key => {
+            if (this[key] !== undefined) json[key] = this[key]
+        })
+
+        return json;
+    }
+
+
     save() {
 
-        let users = User.getUsersStorage()
+        return new Promise((resolve, reject) => {
+            let promise;
 
-        if (this.id > 0) {
-            users.map(u => {
-                if (u._id == this.id) {
+            if (this.id) {
+                promise = HttpRequest.put(`/users/${this.id}`, this.toJSON())
+            } else {
+                promise = HttpRequest.post(`/users`, this.toJSON())
 
-                    Object.assign(u, this)
-                }
-                return u;
+            }
+
+            promise.then(data => {
+                this.loadFromJSON(data)
+
+                resolve(this)
+            }).catch(e => {
+                reject(e)
             })
-        } else {
-            this._id = this.getNewId()
 
-            users.push(this);
-
-
-            //sessionStorage.setItem("users",JSON.stringify(users));
-
-
-        }
-
-        localStorage.setItem("users", JSON.stringify(users));
-
+        })
 
     }
 
@@ -125,17 +146,17 @@ class User {
         return users
     }
 
-    remove(){
+    remove() {
         let users = User.getUsersStorage();
 
-        users.forEach((userData, index) =>{
-            if(this._id == userData._id){
-               users.splice(index, 1); 
+        users.forEach((userData, index) => {
+            if (this._id == userData._id) {
+                users.splice(index, 1);
             }
         });
 
         localStorage.setItem("users", JSON.stringify(users));
-        
+
 
     }
 

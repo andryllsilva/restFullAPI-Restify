@@ -11,6 +11,7 @@ var client = restify.createJsonClient({
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   
+  
   client.get('/users', function(err,request,response,obj) {
     assert.ifError(err)
     res.json(obj)
